@@ -14,7 +14,8 @@ mod tests {
     }
 
     fn setup_token(env: &Env, admin: &Address) -> Address {
-        env.register_stellar_asset_contract(admin.clone())
+        env.register_stellar_asset_contract_v2(admin.clone())
+            .address()
     }
 
     #[test]
@@ -27,7 +28,6 @@ mod tests {
 
         let token_a = setup_token(&env, &admin);
         let token_b = setup_token(&env, &admin);
-        let token_a_client = soroban_sdk::token::Client::new(&env, &token_a);
 
         let initiator = Address::generate(&env);
         let responder = Address::generate(&env);

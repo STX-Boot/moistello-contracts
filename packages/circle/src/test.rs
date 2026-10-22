@@ -55,7 +55,7 @@ mod tests {
     /// Deploy a 2-member active circle and return (env, client, admin, token_id, treasury)
     fn setup_active_circle_with_token(
         env: &Env,
-    ) -> (circle::CircleClient, Address, Address, Address, Address) {
+    ) -> (circle::CircleClient<'_>, Address, Address, Address, Address) {
         let mut config = create_config(env);
         config.max_members = 2u32;
         let admin = config.organizer.clone();
@@ -2036,7 +2036,9 @@ fn test_year_long_lifecycle_simulation() {
     const NEW_FEE_BPS: u32 = 300; // 3%
 
     let token_admin = Address::generate(&env);
-    let token = env.register_stellar_asset_contract(token_admin);
+    let token = env
+        .register_stellar_asset_contract_v2(token_admin)
+        .address();
     let organizer = Address::generate(&env);
     let admin = organizer.clone();
 
@@ -2182,7 +2184,9 @@ fn test_refund_losing_bids_fifty_bidders_in_batches() {
     let env = Env::default();
     env.mock_all_auths();
     let token_admin = Address::generate(&env);
-    let token = env.register_stellar_asset_contract(token_admin);
+    let token = env
+        .register_stellar_asset_contract_v2(token_admin)
+        .address();
     let mut config = create_config(&env, &token);
     config.payout_type = crate::types::PAYOUT_AUCTION;
     config.total_rounds = 1;
