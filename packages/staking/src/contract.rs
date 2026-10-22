@@ -492,7 +492,11 @@ pub fn get_total_staked(env: &Env) -> i128 {
 /// silently capped at `MAX_STAKERS_PAGE_SIZE` so a single call can never return an
 /// unbounded result.  Pass the returned `next_cursor` as the next call's `cursor`
 /// to walk the full list; the list is exhausted when `next_cursor == total`.
-pub fn query_stakers_page(env: &Env, cursor: u32, limit: u32) -> StakersPage {
+pub fn query_stakers_page(
+    env: &Env,
+    cursor: u32,
+    limit: u32,
+) -> Result<StakersPage, StakingError> {
     let stakers: Vec<Address> = env
         .storage()
         .persistent()
@@ -508,7 +512,9 @@ pub fn query_stakers_page(env: &Env, cursor: u32, limit: u32) -> StakersPage {
     let mut entries: Vec<StakerEntry> = Vec::new(env);
     let mut i = start;
     while i < end {
-        let address = stakers.get(i).unwrap();
+        let address = stakers
+            .get(i)
+            .ok_or(StakingError::StakerIndexOutOfRange)?;
         let amount: i128 = env
             .storage()
             .instance()
@@ -519,11 +525,11 @@ pub fn query_stakers_page(env: &Env, cursor: u32, limit: u32) -> StakersPage {
         i += 1;
     }
 
-    StakersPage {
+    Ok(StakersPage {
         entries,
         next_cursor: end,
         total,
-    }
+    })
 }
 
 /// Pause the contract (admin only)
